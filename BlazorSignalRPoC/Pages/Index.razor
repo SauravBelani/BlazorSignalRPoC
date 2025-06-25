@@ -1,0 +1,50 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<h3>Collaborative Editor</h3>
+
+<textarea @bind="text" @oninput="SendText" rows="10" cols="80"></textarea>
+
+<p><strong>Status:</strong> @status</p>
+
+@code {
+    private HubConnection? hubConnection;
+    private string text = string.Empty;
+    private string status = "Disconnected";
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/editorhub"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveText", async (user, newText) =>
+        {
+            text = newText;
+            await InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+        status = "Connected";
+    }
+
+    private async Task SendText(ChangeEventArgs e)
+    {
+        text = e.Value?.ToString() ?? "";
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("BroadcastText", "User", text);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}
