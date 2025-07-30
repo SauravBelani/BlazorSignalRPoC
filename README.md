@@ -73,6 +73,14 @@ app.Run();
 
 ---
 
+## 👁️ Preview
+
+Here's a quick demonstration:
+
+![Demo Animation](BlazorSignalRPoC/Media/BlazorSignalRPoC.gif)
+
+---
+
 ## 📈 Real-World Use Cases
 
 This PoC can be extended into full-scale applications across various industries. Here are practical examples:
